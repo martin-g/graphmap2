@@ -7,9 +7,11 @@
 
 #include <string.h>
 #include <algorithm>
+#include <cmath>
 #include "graphmap/graphmap.h"
 #include "log_system/log_system.h"
 #include "sparsehash/dense_hash_map"
+#include "minimizer_index/seed.h"
 
 using google::dense_hash_map;      // namespace where class lives by default
 

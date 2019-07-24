@@ -5,6 +5,7 @@
  *      Author: ivan
  */
 
+#include <cassert>
 #include "alignment/cigargen.h"
 #include "utility/utility_general.h"
 
@@ -543,6 +544,8 @@ int CountAlignmentOperations(std::vector<unsigned char>& alignment, const int8_t
                              int64_t match, int64_t mismatch, int64_t gap_open, int64_t gap_extend,
                              bool skip_leading_and_trailing_insertions,
                              int64_t* ret_eq, int64_t* ret_x, int64_t* ret_i, int64_t* ret_d, int64_t *ret_alignment_score, int64_t *ret_edit_dist, int64_t *ret_nonclipped_length) {
+  assert(alignment_position_start >= 0 && "Serious problem in counting alignment operations, stemmed from alignment somewhere.");
+
   unsigned char last_move = -1;  // Code of last move.
   int64_t num_same_moves = 0;
   int64_t read_position = 0;
@@ -645,7 +648,6 @@ std::string AlignmentToMD(std::vector<unsigned char>& alignment, const int8_t *r
 
     } else {      // Just truncate the current op.
       cigar_array[i-offset] = cigar_array[i];
-
     }
   }
 
@@ -659,7 +661,6 @@ std::string AlignmentToMD(std::vector<unsigned char>& alignment, const int8_t *r
 
     if (cigar_array[i].op == '=') {
       md << cigar_array[i].count;
-
     } else if (cigar_array[i].op == 'X') {
       for (int32_t j=0; j<cigar_array[i].count; j++) {
         md << ref_data[ref_position + j];

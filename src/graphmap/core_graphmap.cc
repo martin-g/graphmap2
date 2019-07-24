@@ -6,6 +6,7 @@
  */
 
 #include "graphmap/graphmap.h"
+#include "minimizer_index/seed.h"
 
 
 
@@ -94,7 +95,7 @@ int GraphMap::ProcessKmerCacheFriendly_(int8_t *kmer, int64_t kmer_start_positio
   int64_t num_vertices = mapping_data->vertices.num_vertices;
 
   for (int64_t i = 0; i < (num_hits_ptr[0]); i++) {
-    int64_t hit = is::Seed::seed_position(hits_ptr[0][i]);
+      int64_t hit = is::Seed::seed_position(hits_ptr[0][i]);
     int64_t position = num_vertices - hit - 1;
     int64_t best_vertex_idx = -1;
 
