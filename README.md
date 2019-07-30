@@ -1,5 +1,12 @@
 ## GraphMap - A highly sensitive and accurate mapper for long, error-prone reads  
-**__Current Version: 0.5.2__**  
+**__Current Version: 0.5.3__**  
+Release date: 30 July 2019  
+
+Version, containing tuning of alignments specific for long RNA reads:  
+
+**Note:** After running `git pull`, please `make modules` before `make`.  
+
+**__Previous Version: 0.5.2__**  
 Release date: 26 May 2017  
 
 Bugfix version, addressing several segfault and other important issues:  
@@ -8,10 +15,7 @@ Bugfix version, addressing several segfault and other important issues:
 - Changed the unmapped / Inf E-value (the ZE:f: tag) to be a valid float value (`std::numeric_limits<float>::max()` instead of `Inf`).  
 - Added several missing `#include`s.  
 
-**Note:** After running `git pull`, please `make modules` before `make`.  
-
-
-**__Current Version: 0.5.1__**  
+**__Previous Version: 0.5.1__**  
 Release date: 04 March 2017  
 
 Patch version resolving huge memory consumption when building the index.  
