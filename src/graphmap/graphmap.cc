@@ -757,7 +757,6 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 //	  myfile.close();
 //	}
 
-	int64_t num_threads = (int64_t) parameters->num_threads;
 	#pragma omp parallel for num_threads(num_threads) firstprivate(evalue_params) shared(parameters, sam_lines) schedule(dynamic, 1)
 	for (int var = 0; var < realignment_clusters.size(); ++var) {
 	  std::vector<RealignmentStructure *> current_realignment_cluster = realignment_clusters[var];
