@@ -14,7 +14,6 @@
 #include "utility/utility_general.h"
 #include "transcriptome.h"
 #include "index/index_util.h"
-#include <iostream>
 
 #include "aligner/aligner_containers.h"
 #include "aligner/aligner_ksw2.h"
@@ -758,7 +757,8 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 //	  myfile.close();
 //	}
 
-	#pragma omp parallel for num_threads(12) firstprivate(evalue_params) shared(parameters, sam_lines) schedule(dynamic, 1)
+	int64_t num_threads = (int64_t) parameters->num_threads;
+	#pragma omp parallel for num_threads(num_threads) firstprivate(evalue_params) shared(parameters, sam_lines) schedule(dynamic, 1)
 	for (int var = 0; var < realignment_clusters.size(); ++var) {
 	  std::vector<RealignmentStructure *> current_realignment_cluster = realignment_clusters[var];
 
@@ -1260,9 +1260,9 @@ int GraphMap::ProcessSequenceFileInParallel(ProgramParameters *parameters, const
 //  int64_t num_threads = std::min(24, ((int) omp_get_num_procs()) / 2);
 //
 //  if (parameters->num_threads > 0)
-    int64_t num_threads = 12;
+//    int64_t num_threads = 1;
 
-//  int64_t num_threads = (int64_t) parameters->num_threads;
+  int64_t num_threads = (int64_t) parameters->num_threads;
   LogSystem::GetInstance().Log(VERBOSE_LEVEL_HIGH | VERBOSE_LEVEL_MED, true, FormatString("Using %ld threads.", num_threads), "ProcessReads");
 
   // Set up the starting and ending read index.
