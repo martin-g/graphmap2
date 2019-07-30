@@ -4,7 +4,22 @@ Release date: 30 July 2019
 
 Version, containing tuning of alignments specific for long RNA reads:  
 
-**Note:** After running `git pull`, please `make modules` before `make`.  
+## Mapping RNA-seq reads  
+
+Support for spliced alignments in GraphMap is a work in progress and currently experimental.  
+To activate this mode, specify ```-x rnaseq``` alongside to other command line parameters. This feature is available on the ```rna-alpha``` branch. Install and compile in the testing mode as such:  
+```  
+git clone https://github.com/isovic/graphmap  
+cd graphmap  
+git checkout rna-alpha  
+make modules  
+make -j 4 testing  
+```  
+
+After this, run GraphMap using:  
+```  
+bin/graphmap-not_release align -x rnaseq -r ref.fa -d reads.fastq -o out.sam  
+```  
 
 **__Previous Version: 0.5.2__**  
 Release date: 26 May 2017  
