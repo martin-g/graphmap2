@@ -4,7 +4,7 @@ Release date: 30 July 2019
 
 Version, containing tuning of alignments specific for long RNA reads:  
 
-## Mapping RNA-seq reads  
+**__Mapping RNA-seq reads__**
 
 Support for spliced alignments in GraphMap is a work in progress and currently experimental.  
 To activate this mode, specify ```-x rnaseq``` alongside to other command line parameters. This feature is available on the ```rna-alpha``` branch. Install and compile in the testing mode as such:  
