@@ -1,4 +1,4 @@
-## GraphMap - A highly sensitive and accurate mapper for long, error-prone reads  
+## GraphMap2 - A highly sensitive and accurate mapper for long, error-prone reads  
 **__Current Version: 0.5.3__**  
 Release date: 30 July 2019  
 
@@ -6,16 +6,15 @@ Version, containing tuning of alignments specific for long RNA reads.
 
 **__Mapping RNA-seq reads__**
 
-Support for spliced alignments in GraphMap is a work in progress and currently experimental.  
-To activate this mode, specify ```-x rnaseq``` alongside to other command line parameters. This feature is available on the ```rna-alpha``` branch. Install and compile in the testing mode as such:  
+To activate spliced alignments mode, specify ```-x rnaseq``` alongside to other command line parameters. Install and compile in the testing mode as such:  
 ```  
-git clone https://github.com/lbcb-sci/graphmap  
-cd graphmap  
+git clone https://github.com/lbcb-sci/graphmap2  
+cd graphmap2  
 make modules  
 make -j 4 testing  
 ```  
 
-After this, run GraphMap using:  
+After this, run GraphMap2 using:  
 ```  
 bin/graphmap-not_release align -x rnaseq -r ref.fa -d reads.fastq -o out.sam  
 ```  
