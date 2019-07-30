@@ -2,7 +2,7 @@
 **__Current Version: 0.5.3__**  
 Release date: 30 July 2019  
 
-Version, containing tuning of alignments specific for long RNA reads:  
+Version, containing tuning of alignments specific for long RNA reads.
 
 **__Mapping RNA-seq reads__**
 
@@ -11,7 +11,6 @@ To activate this mode, specify ```-x rnaseq``` alongside to other command line p
 ```  
 git clone https://github.com/lbcb-sci/graphmap  
 cd graphmap  
-git checkout rna-alpha  
 make modules  
 make -j 4 testing  
 ```  
