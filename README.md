@@ -9,7 +9,7 @@ Version, containing tuning of alignments specific for long RNA reads:
 Support for spliced alignments in GraphMap is a work in progress and currently experimental.  
 To activate this mode, specify ```-x rnaseq``` alongside to other command line parameters. This feature is available on the ```rna-alpha``` branch. Install and compile in the testing mode as such:  
 ```  
-git clone https://github.com/isovic/graphmap  
+git clone https://github.com/lbcb-sci/graphmap  
 cd graphmap  
 git checkout rna-alpha  
 make modules  
@@ -91,7 +91,7 @@ Description of the current effort as well as how to reach the experimental imple
 
 ### Quick start on Linux x64
 ```  
-git clone https://github.com/isovic/graphmap.git  
+git clone https://github.com/lbcb-sci/graphmap.git  
 cd graphmap  
 make modules  
 make  
