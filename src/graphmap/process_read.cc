@@ -859,18 +859,18 @@ bool GraphMap::GetMappingData(RealignmentStructure* rs, std::shared_ptr<is::Mini
 	auto result = anchor_aligner->CreateAlignmentResult(rs->raw_start, rs->raw_stop, rs->query_start, rs->query_end, rez);
 
 	if(rs->orientation == kReverse) {
-		int halvening = 0;
-		for(int i = 0; i < index->get_reference_lengths().size()/2; i++) {
-			int len = index->get_reference_lengths()[i];
+		int64_t halvening = 0;
+		for(int64_t i = 0; i < index->get_reference_lengths().size()/2; i++) {
+			int64_t len = index->get_reference_lengths()[i];
 			halvening += index->get_reference_lengths()[i];
 		}
 
-		long buffer_offset = 0;
-		long desired_index = 0;
+		int64_t buffer_offset = 0;
+		int64_t desired_index = 0;
 		bool found_index = false;
 
-		for(int i = 0; i < index->get_reference_lengths().size()/2; i++) {
-			long len = index->get_reference_lengths()[i];
+		for(int64_t i = 0; i < index->get_reference_lengths().size()/2; i++) {
+			int64_t len = index->get_reference_lengths()[i];
 			if(!found_index) {
 				if(buffer_offset + len < (rs->raw_start-halvening)) {
 					buffer_offset += len;
@@ -881,8 +881,8 @@ bool GraphMap::GetMappingData(RealignmentStructure* rs, std::shared_ptr<is::Mini
 			}
 		}
 
-		long new_start = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_stop - halvening) - buffer_offset));
-		long new_stop = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_start - halvening) - buffer_offset));
+		int64_t new_start = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_stop - halvening) - buffer_offset));
+		int64_t new_stop = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_start - halvening) - buffer_offset));
 
 		result = anchor_aligner->CreateAlignmentResult(new_start, new_stop, rs->query_start, rs->query_end, rez);
 	}
@@ -982,6 +982,7 @@ double GraphMap::RealignRead(const SingleSequence *read, std::shared_ptr<is::Min
 int GraphMap::RNAGenerateAlignments_(int order_number, MappingData *mapping_data, std::shared_ptr<is::MinimizerIndex> index, // @suppress("Type cannot be resolved") // @suppress("Member declaration not found")
                                      std::shared_ptr<is::Transcriptome> transcriptome, const SingleSequence *read,
                                      const ProgramParameters *parameters, const EValueParams *evalue_params, std::vector<RealignmentStructure *> *realignment_structures) {
+
   if (mapping_data->intermediate_mappings.size() == 0) { // @suppress("Method cannot be resolved")
 	std::vector<CigarExon> empty_cigar;
 	RealignmentStructure *rs = new RealignmentStructure(order_number, read, NULL, -1, -10000, empty_cigar);

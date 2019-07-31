@@ -377,6 +377,7 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 	std::sort(std::begin(exonsInfos), std::end(exonsInfos), [](ExonInfo a, ExonInfo b) {return a.order_number < b.order_number; });
 	std::vector<ExonInfo> merged_exons;
 
+
 	ExonInfo previous_exon = exonsInfos[0];
 	int index = 1;
 	while(index != exonsInfos.size()) {
@@ -385,7 +386,7 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 				abs((previous_exon.stop-previous_exon.rightOffset)-(current_exon.stop-current_exon.rightOffset)) <  5) {
 			ExonInfo new_exon = ExonInfo(previous_exon, current_exon);
 			new_exon.reference = previous_exon.reference;
-			for (long var = previous_exon.stop; var < current_exon.start; ++var) {
+			for (int64_t var = previous_exon.stop; var < current_exon.start; ++var) {
 				new_exon.reference.push_back(ref_data[var]);
 			}
 			new_exon.reference += current_exon.reference;
@@ -396,6 +397,7 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 		}
 		index += 1;
 	}
+
 	merged_exons.push_back(previous_exon);
 
 	previous_exon = merged_exons[0];
@@ -414,18 +416,16 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 
 	int first_ref_len = ((previous_exon.reference.size() - first_offset_left) + first_offset_right);
 	std::string ref;
-	for (int var = previous_exon.start; var < previous_exon.stop - first_offset_left; ++var) {
+	for (int64_t var = previous_exon.start; var < previous_exon.stop - first_offset_left; ++var) {
 		ref.push_back(ref_data[var]);
 	}
 	if(first_offset_right > 0) {
-		for (int var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
+		for (int64_t var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
 			ref.push_back(ref_data[var]);
 		}
 	}
 
-
 	std::string read = previous_exon.content.substr(front_clipping, previous_exon.content.size()-front_clipping);
-
 
 	bool shouldAling = previous_exon.rightOffset != 0;
 
@@ -462,11 +462,11 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 					back_clipping = current_exon.cigar[current_exon.cigar.size()].count;
 				}
 
-				for (int var = current_exon.start - second_offset_left; var < current_exon.start; ++var) {
+				for (int64_t var = current_exon.start - second_offset_left; var < current_exon.start; ++var) {
 					ref.push_back(ref_data[var]);
 				}
 
-				for (int var = current_exon.start + second_offset_right; var < current_exon.stop; ++var) {
+				for (int64_t var = current_exon.start + second_offset_right; var < current_exon.stop; ++var) {
 					ref.push_back(ref_data[var]);
 				}
 
@@ -585,14 +585,14 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 				first_offset_right = base_offset + std::max(previous_exon.rightOffset, 0);
 
 
-				for (int var = previous_exon.start - second_offset_left; var < previous_exon.start; ++var) {
+				for (int64_t var = previous_exon.start - second_offset_left; var < previous_exon.start; ++var) {
 					ref.push_back(ref_data[var]);
 				}
-				for (int var = previous_exon.start + second_offset_right; var < previous_exon.stop - first_offset_left; ++var) {
+				for (int64_t var = previous_exon.start + second_offset_right; var < previous_exon.stop - first_offset_left; ++var) {
 					ref.push_back(ref_data[var]);
 				}
 				if(first_offset_right > 0) {
-					for (int var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
+					for (int64_t var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
 						ref.push_back(ref_data[var]);
 					}
 				}
@@ -600,6 +600,7 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 				first_ref_len = (((previous_exon.reference.size() - first_offset_left) + first_offset_right) + second_offset_left) - second_offset_right;
 				shouldAling = previous_exon.rightOffset != 0;
 			} else {
+
 				if (container_vector.size() > 0) {
 					for (auto& c: container_vector) {
 						complete_cigar.push_back(c);
@@ -632,11 +633,11 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 				first_offset_left = base_offset + std::max(-previous_exon.rightOffset, 0);
 				first_offset_right = base_offset + std::max(previous_exon.rightOffset, 0);
 
-				for (int var = previous_exon.start; var < previous_exon.stop - first_offset_left; ++var) {
+				for (int64_t var = previous_exon.start; var < previous_exon.stop - first_offset_left; ++var) {
 					ref.push_back(ref_data[var]);
 				}
 				if(first_offset_right > 0) {
-					for (int var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
+					for (int64_t var = previous_exon.stop - first_offset_left; var < previous_exon.stop + first_offset_right; ++var) {
 						ref.push_back(ref_data[var]);
 					}
 				}
@@ -761,7 +762,6 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	for (int var = 0; var < realignment_clusters.size(); ++var) {
 	  std::vector<RealignmentStructure *> current_realignment_cluster = realignment_clusters[var];
 
-
 	  uint32_t thread_id = omp_get_thread_num();
 
 	  int64_t min_index = INT_MAX;
@@ -852,8 +852,6 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 		bool isEdgeExonSet = false;
 
 		for(CigarExon &ce: previousCigarExons) {
-			  std::string qname = ((std::string) (read->get_header()));
-
 			if(!ce.isGap) {
 				int length_read = 0;
 				int length_ref = 0;
@@ -874,7 +872,7 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 				}
 
 				order_number += 1;
-				long location = realignment_structure->raw_start;
+				int64_t location = realignment_structure->raw_start;
 
 				if(location > halvening) {
 					location = realignment_structure->raw_stop;
@@ -882,7 +880,7 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 					int64_t desired_index = 0;
 					bool found_index = false;
 
-					for(int j = 0; j < first_index->get_reference_lengths().size()/2; j++) {
+					for(int64_t j = 0; j < first_index->get_reference_lengths().size()/2; j++) {
 						int64_t len = first_index->get_reference_lengths()[j];
 						if(!found_index) {
 							if(buffer_offset + len < (location-halvening)) {
@@ -893,11 +891,12 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 							}
 						}
 					}
+
 					location = buffer_offset + (first_index->get_reference_lengths()[desired_index] - ((location - halvening) - buffer_offset));
 				}
 
 				std::string cut_reff;
-				for (int j = (suma_ref + location); j < (suma_ref + location+length_ref); ++j) {
+				for (int64_t j = (suma_ref + location); j < (suma_ref + location+length_ref); ++j) {
 				  cut_reff += ref_data[j];
 				}
 
@@ -1145,8 +1144,8 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 			    	 int distance_start = max_coverage + 1;
 
 			    	 for(int pivot: start_pivots) {
-			    		 int current_location = (int) (einfo.start-minLocation);
-			    		 int new_distance = abs(pivot - current_location);
+			    		 int64_t current_location = einfo.start - minLocation;
+			    		 int64_t new_distance = abs(pivot - current_location);
 			    		 if(new_distance < distance_start) {
 			    			 distance_start = new_distance;
 			    			 startOffset = pivot;
@@ -1216,6 +1215,7 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 				  RealignmentStructure* realignment_structure = current_realignment_cluster[i];
 
 				  if (realignment_structure->sequence->get_header() == x.second[0].read_id) {
+
 					  std::string sam_line_test = "";
 
 					  auto mapping_data_test = std::unique_ptr<MappingData>(new MappingData);

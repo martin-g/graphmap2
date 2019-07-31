@@ -16,7 +16,7 @@
 #include <sstream>
 
 #define SOFTWARE_NAME "GraphMap"
-#define GRAPHMAP_CURRENT_VERSION "v0.5.3"
+#define GRAPHMAP_CURRENT_VERSION "v0.6.0"
 #define GRAPHMAP_CURRENT_VERSION_RELEASE_DATE (std::string(__DATE__) + std::string(" at ") + std::string(__TIME__)) // __TIMESTAMP__ // "12 October 2014"
 #define COPYRIGHT "Copyright Ivan Sovic, Mile Sikic and Niranjan Nagarajan, 2015, 2016.\n" \
                   "\n" \
@@ -128,7 +128,7 @@ struct ProgramParameters {
   int64_t max_allowed_overhang = 1000;
   double min_percent_cov_bases = 0.01;
   int64_t min_num_seeds = 4;
-  
+
   double anchor_chain_indel_bandwidth = 0.23; // error_rate / 2 + 0.1f;
   int64_t anchor_chain_max_dist = 200;
   int64_t anchor_chain_min_cov_bases = 50;

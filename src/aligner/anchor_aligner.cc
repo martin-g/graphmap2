@@ -279,11 +279,11 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 	} else if (left_offset_ref >= 0 && right_offset_ref >= 0) {
 //		std::cout << "3" << std::endl;
 		std::string ref_string;
-		for(int i = 0; i < left_offset_ref; i++) {
+		for(int64_t i = 0; i < left_offset_ref; i++) {
 			ref_string.push_back(ref[*start_position_ref + i]);
 		}
 		std::string read_string;
-		for(int i = 0; i < right_offset_read; i++) {
+		for(int64_t i = 0; i < right_offset_read; i++) {
 			read_string.push_back(query[*start_position_read + i]);
 		}
 		const char* ref_sub = ref_string.c_str();
@@ -305,11 +305,11 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 	} else if (left_offset_ref <= 0 && right_offset_ref <= 0) {
 //		std::cout << "4" << std::endl;
 		std::string ref_string;
-		for(int i = right_offset_ref; i < 0; i++) {
+		for(int64_t i = right_offset_ref; i < 0; i++) {
 			ref_string.push_back(ref[*start_position_ref + number_of_bases - i]);
 		}
 		std::string read_string;
-		for(int i = -left_offset_read; i < 0; i++) {
+		for(int64_t i = -left_offset_read; i < 0; i++) {
 			read_string.push_back(query[*start_position_read + left_offset_read]);
 		}
 		const char* ref_sub = ref_string.c_str();
@@ -329,7 +329,7 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 	}
 }
 
-std::shared_ptr<AlignmentResult> AnchorAligner::CreateAlignmentResult(int rstart, int rend, int qstart, int qend, std::vector<is::CigarOp> rez) {
+std::shared_ptr<AlignmentResult> AnchorAligner::CreateAlignmentResult(int64_t rstart, int64_t rend, int64_t qstart, int64_t qend, std::vector<is::CigarOp> rez) {
 	  auto result = std::shared_ptr<AlignmentResult>(new AlignmentResult);
 
 	  for(is::CigarOp &c: rez) {
@@ -686,7 +686,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 		  return result;
 	  }
 
-
 	  aligner_->Global(query + start_ref_q, anchors[i+1].qend - start_ref_q,
 		                      ref + start_ref, anchors[i+1].rend - start_ref, type);
 
@@ -859,7 +858,8 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 	  if(!isAdapter && frontS < 100) {
 		  std::string ref_String;
 
-		  for(int i = anchors.front().rstart-window; i < anchors.front().rstart; i++) {
+		  for(int64_t i = anchors.front().rstart-window; i < anchors.front().rstart; i++) {
+			  std::cout << "i " << i << std::endl;
 			  ref_String.insert(0, 1, ref[i]);
 		  }
 
@@ -915,7 +915,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 			  }
 			  tmp_cigar.clear();
 		  }
-
   	  } else {
   	  }
   }
@@ -950,14 +949,14 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
   std::stack<is::CigarOp> cigar_stack;
   std::deque<is::CigarOp> cigar_queue;
 
-  for(int i = 0; i < result->cigar.size(); i++) {
+  for(int64_t i = 0; i < result->cigar.size(); i++) {
 	  cigar_queue.push_back(result->cigar[i]);
   }
 
   while (!cigar_queue.empty()) {
 	is::CigarOp cigar_op = cigar_queue.front();
 	cigar_queue.pop_front();
-	int number_of_bases = cigar_op.count;
+	int64_t number_of_bases = cigar_op.count;
 
 	if (cigar_op.op == 'S') {
 		cigar_stack.push(cigar_op);
