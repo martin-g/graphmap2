@@ -859,7 +859,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 		  std::string ref_String;
 
 		  for(int64_t i = anchors.front().rstart-window; i < anchors.front().rstart; i++) {
-			  std::cout << "i " << i << std::endl;
+//			  std::cout << "i " << i << std::endl;
 			  ref_String.insert(0, 1, ref[i]);
 		  }
 
