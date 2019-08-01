@@ -1,5 +1,5 @@
 ## GraphMap2 - A highly sensitive and accurate mapper for long, error-prone reads  
-**__Current Version: 0.6.0__**  
+**__Current Version: 0.6.1__**  
 Release date: 30 July 2019  
 
 Version, containing tuning of alignments specific for long RNA reads.
