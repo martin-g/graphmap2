@@ -1,6 +1,6 @@
-BIN = ./bin/graphmap-not_release
+BIN = ./bin/graphmap2
 BIN_DEBUG = ./bin/graphmap-debug
-BIN_LINUX = ./bin/Linux-x64/graphmap
+BIN_LINUX = ./bin/Linux-x64/graphmap2
 BIN_MAC = ./bin/Mac/graphmap
 OBJ_TESTING = ./obj_test
 OBJ_TESTING_EXT = ./obj_testext
@@ -68,7 +68,7 @@ modules:
 
 testing: $(OBJ_FILES_FOLDER_TESTING)
 	mkdir -p $(dir $(BIN))
-	$(GCC) $(LD_FLAGS) $(LIB_DIRS) -o $(BIN) $(OBJ_FILES_FOLDER_TESTING) $(LD_LIBS)
+	$(GCC) $(LD_FLAGS) $(LIB_DIRS) -o $(BIN) $(OBJ_FILES_FOLDER_TESTING) $(LD_LIBS)	
 	
 obj_test/%.o: %.cc $(H_FILES)
 	mkdir -p $(dir $@)

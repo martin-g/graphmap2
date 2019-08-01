@@ -19,9 +19,7 @@ int ProcessArgsGraphMap(int argc, char **argv, ProgramParameters *parameters)
   argparser.AddCompositeArgument("illumina", "-a anchorgotoh -w normal -M 5 -X 4 -G 8 -E 6");
 //  argparser.AddCompositeArgument("overlap", "-a anchor -w normal --overlapper --evalue 1e0 --ambiguity 0.50 --min-bin-perc 0.10 --bin-step 0.90 --max-regions -1 --mapq -1 --secondary");
   argparser.AddCompositeArgument("overlap", "-a anchor -w normal --overlapper --evalue 1e0 --ambiguity 0.50 --min-bin-perc 0.10 --bin-step 0.90 --max-regions -1 --mapq -1 --secondary");
-#ifndef RELEASE_VERSION
   argparser.AddCompositeArgument("rnaseq", "--ambiguity 0.5 --secondary --min-bin-perc 0.01 --bin-step 0.99 --max-regions 20 --mapq -1 --spliced --chain-min-cov 40");
-#endif
 
 //  argparser.AddCompositeArgument("overlap", "-a anchor -w normal --overlapper --evalue 1e0 --ambiguity 0.50 --min-bin-perc 0.10 --bin-step 0.90 --max-regions -1 --mapq -1 --secondary");
 //  argparser.AddCompositeArgument("sensitive", "-a gotoh -w sg -M 5 -X 4 -G 8 -E 6");
@@ -80,10 +78,10 @@ int ProcessArgsGraphMap(int argc, char **argv, ProgramParameters *parameters)
   argparser.AddArgument(&parameters->mapq_threshold, VALUE_TYPE_INT64, "c", "mapq", "1", "Threshold for mapping quality. If mapq < INT, read will be called unmapped.", 0, "Alignment options");
   argparser.AddArgument(&parameters->use_extended_cigar, VALUE_TYPE_BOOL, "", "extcigar", "0", "Use the extended CIGAR format for output alignments.", 0, "Alignment options");
 
-#ifndef RELEASE_VERSION
+// #ifndef RELEASE_VERSION
   argparser.AddArgument(&parameters->use_spliced, VALUE_TYPE_BOOL, "", "spliced", "0", "Align clusters of anchors independently and report them as separate alignments. Does not align in-between clusters. Works only for anchored alignment modes.", 0, "Alignment options");
   argparser.AddArgument(&parameters->use_split, VALUE_TYPE_BOOL, "", "split", "0", "Align clusters of anchors independently and report them as separate alignments. Does not align in-between clusters. Works only for anchored alignment modes.", 0, "Alignment options");
-#endif
+// #endif
 
   argparser.AddArgument(&parameters->disable_end_to_end, VALUE_TYPE_BOOL, "", "no-end2end", "0", "Disables extending of the alignments to the ends of the read. Works only for anchored modes.", 0, "Alignment options");
 //  argparser.AddArgument(&parameters->extend_aln_to_end, VALUE_TYPE_BOOL, "", "extend-to-end", "1", "Switches extension of anchored alignment to read/reference ends. If false, alignments will be bound by the first and last anchor. Otherwise, alignment will proceed until an end of one of the sequences is hit.", 0, "Alignment options");
