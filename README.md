@@ -11,12 +11,12 @@ To activate spliced alignments mode, specify ```-x rnaseq``` alongside to other 
 git clone https://github.com/lbcb-sci/graphmap2  
 cd graphmap2  
 make modules  
-make -j 4 testing  
+make  
 ```  
 
 After this, run GraphMap2 using:  
 ```  
-bin/graphmap-not_release align -x rnaseq -r ref.fa -d reads.fastq -o out.sam  
+bin/graphmap2 align -x rnaseq -r ref.fa -d reads.fastq -o out.sam  
 ```  
 
 **__Previous Version: 0.5.2__**  
@@ -60,7 +60,7 @@ Also, this release fixes an issue with **transcriptome mapping**, where recall w
 GraphMap can now accept a GTF file to internally construct a transcriptome sequence from a given reference genome, and map RNA-seq data to it. The final alignments are converted back to genome space by placing ```N``` operations in the CIGAR strings.  
 
 To use the new transcriptome mapping option simply specify a GTF file using the ```--gtf``` option:  
-```graphmap align -r reference.fa --gtf reference.gtf -d reads.fastq -o out.sam```  
+```graphmap2 align -r reference.fa --gtf reference.gtf -d reads.fastq -o out.sam```  
 
 
 For a detailed change log from the previous release, take a look at [doc/changelog.md](doc/changelog.md).  
@@ -89,16 +89,16 @@ Description of the current effort as well as how to reach the experimental imple
 
 ### Quick start on Linux x64
 ```  
-git clone https://github.com/lbcb-sci/graphmap.git  
-cd graphmap  
+git clone https://github.com/lbcb-sci/graphmap2.git  
+cd graphmap2
 make modules  
 make  
 
 # To align:  
-./bin/Linux-x64/graphmap align -r reference.fa -d reads.fasta -o output.sam  
+./bin/Linux-x64/graphmap2 align -r reference.fa -d reads.fasta -o output.sam  
 
 # To overlap:  
-./bin/Linux-x64/graphmap owler -r reads.fasta -d reads.fasta -o output.mhap  
+./bin/Linux-x64/graphmap2 owler -r reads.fasta -d reads.fasta -o output.mhap  
 ```  
 
 ### Description
@@ -140,56 +140,56 @@ More installation instructions can be found in the [INSTALL.md](INSTALL.md) file
 ### Usage examples
 ```
 # **Align** all reads from a given FASTA/FASTQ file using anchored alignment approach:  
-./graphmap align -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # **Overlap** all reads from a given FASTA/FASTQ file and report overlaps in MHAP format (fast):  
-./graphmap owler -r reads.fa -d reads.fa -o overlaps.mhap  
+./graphmap2 owler -r reads.fa -d reads.fa -o overlaps.mhap  
 
 # **Align** all reads to a transcriptome sequence:  
-./graphmap align -r scerevisiae.fa --gtf scerevisiae.gtf -d reads.fastq -o alignments.sam  
+./graphmap2 align -r scerevisiae.fa --gtf scerevisiae.gtf -d reads.fastq -o alignments.sam  
 
 
 # Align all reads and report alignments using the extended CIGAR format.  
-./graphmap align -r escherichia_coli.fa -d reads.fastq -o alignments.sam --extcigar  
+./graphmap2 align -r escherichia_coli.fa -d reads.fastq -o alignments.sam --extcigar  
 
 # Align all reads from a given FASTA/FASTQ file with default number of threads using semiglobal bit-vector alignment:  
-./graphmap align -a sg -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -a sg -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Overlap all reads from a given FASTA/FASTQ in a full GraphMap mode with generating alignments (slow):  
-./graphmap align -x overlap -r reads.fa -d reads.fa -o overlaps.sam  
+./graphmap2 align -x overlap -r reads.fa -d reads.fa -o overlaps.sam  
 
 # Align reads using the Gotoh for semiglobal alignment:  
-./graphmap align -a sggotoh -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -a sggotoh -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Align reads using Gotoh alignment with anchored approach:  
-./graphmap align -a anchorgotoh -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -a anchorgotoh -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Process reads from a circular genome:  
-./graphmap align -C -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -C -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Threshold the E-value of alignments to 1e-100. Alignments with E-value > 1e-100 will be called unmapped:  
-./graphmap align --evalue 1e-100 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align --evalue 1e-100 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Output all secondary alignments instead of only one best:  
-./graphmap align --secondary -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align --secondary -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Control the similarity for secondary alignments. All alignments to within F*num_covered_bases from the best will be output.  
-./graphmap align --secondary -F 0.05 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align --secondary -F 0.05 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Limit the number of threads to 8, and load reads in batches of 50MB:  
-./graphmap align -t 8 -B 50 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -t 8 -B 50 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Align reads using more sensitive parameters for Illumina data:  
-./graphmap align -x illumina -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -x illumina -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Load all reads in one batch and align only the first 1000 reads:  
-./graphmap align -B 0 -n 1000 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align -B 0 -n 1000 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Rebuild the index if it already exists:  
-./graphmap align --rebuild-index -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
+./graphmap2 align --rebuild-index -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
 
 # Generate only the index.  
-./graphmap align -I -r escherichia_coli.fa  
+./graphmap2 align -I -r escherichia_coli.fa  
 
 # Run a debug version of GraphMap (build with "make debug") and verbose the SAM output to see various info about alignment:  
 ./graphmap-debug align -b 3 -r escherichia_coli.fa -d reads.fastq -o alignments.sam  
