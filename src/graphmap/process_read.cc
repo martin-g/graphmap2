@@ -1136,7 +1136,7 @@ int GraphMap::RNAGenerateAlignments_(int order_number, MappingData *mapping_data
 	  cigarExons2.push_back(cigExon);
   }
 
-  double difference = abs(score22-score);
+  double difference = fabs(score22-score);
   betterCigarExons = cigarExons1;
 
   if(aln_result2->rv == is::AlignmentReturnValue::OK) {
