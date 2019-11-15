@@ -1,6 +1,6 @@
 ## GraphMap2 - A highly sensitive and accurate mapper for long, error-prone reads  
 
-**__Current Version: 0.6.2__**  
+**__Current Version: 0.6.3__**  
 Release date: 15 November 2019  
 
 Cigar string different from read length bug fixed. Segmentation fault in ksw2 fixed. Version bumped.
