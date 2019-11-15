@@ -682,7 +682,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 	  int64_t start_ref = anchors[i].rstart + offset;
 	  int64_t start_ref_q = anchors[i].qstart + offset_q;
 
-	  if(((anchors[i+1].qend - start_ref_q) > 85000 || (anchors[i+1].rend - start_ref) > 85000) && type == 0) {
+	  if(((anchors[i+1].qend - start_ref_q) > 25000 || (anchors[i+1].rend - start_ref) > 85000) || ((anchors[i+1].rend - start_ref) + (anchors[i+1].qend - start_ref_q) > 88000)) {
 		  return result;
 	  }
 
