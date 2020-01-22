@@ -21,6 +21,8 @@
 #include "aligner/aligner_util.hpp"
 #include "aligner/pairwise_penalties.h"
 
+#include <iostream>
+
 GraphMap::GraphMap() : transcriptome_(nullptr) {
   indexes_.clear();
 }
@@ -298,6 +300,10 @@ void GraphMap::ProcessReadsFromSingleFile(ProgramParameters &parameters, FILE *f
   SequenceFile reads;
   reads.OpenFileForBatchLoading(parameters.reads_path);
 
+  if (parameters.composite_parameters == "rnaseq") {
+	  reads.translateUtoT = true;
+  }
+
   clock_t absolute_time = clock();
   clock_t last_batch_loading_time = clock();
 
@@ -436,11 +442,6 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 	std::vector<is::CigarOp> complete_cigar;
 	bool did_adjust_read = false;
 	std::vector<is::CigarOp> container_vector;
-
-
-	for(ExonInfo exon: merged_exons) {
-		std::string str(exon.read_id);
-	}
 
 	while(index != merged_exons.size()) {
 		ExonInfo current_exon = merged_exons[index];
@@ -657,6 +658,134 @@ std::vector<is::CigarOp> GraphMap::ProcessReadExons(std::vector<ExonInfo> &exons
 	}
 }
 
+std::vector<ExonInfo> set_exon_offsets(std::vector<ExonInfo> &exonsInfos, const char *ref_data) {
+
+	if (exonsInfos.size() <= 0) {
+		std::vector<ExonInfo> tmp;
+		return tmp;
+	}
+
+	std::sort(std::begin(exonsInfos), std::end(exonsInfos), [](ExonInfo a, ExonInfo b) {return a.order_number < b.order_number; });
+	std::vector<ExonInfo> merged_exons;
+
+	ExonInfo previous_exon = exonsInfos[0];
+	int index = 1;
+	while(index != exonsInfos.size()) {
+		ExonInfo current_exon = exonsInfos[index];
+		if (abs((previous_exon.start-previous_exon.leftOffset)-(current_exon.start-current_exon.leftOffset)) <  5 ||
+				abs((previous_exon.stop-previous_exon.rightOffset)-(current_exon.stop-current_exon.rightOffset)) <  5) {
+			ExonInfo new_exon = ExonInfo(previous_exon, current_exon);
+			new_exon.reference = previous_exon.reference;
+			for (int64_t var = previous_exon.stop; var < current_exon.start; ++var) {
+				new_exon.reference.push_back(ref_data[var]);
+			}
+			new_exon.reference += current_exon.reference;
+			previous_exon = new_exon;
+		} else {
+			merged_exons.push_back(previous_exon);
+			previous_exon = current_exon;
+		}
+		index += 1;
+	}
+
+	merged_exons.push_back(previous_exon);
+
+	for(int i = 0; i < merged_exons.size()-1; i++) {
+		std::vector<int> end_pivots = merged_exons[i].end_pivots;
+		std::vector<int> start_pivots = merged_exons[i+1].start_pivots;
+
+		std::vector<Pivot> start_pivotes_structs;
+		std::vector<Pivot> end_pivotes_structs;
+
+		int ind = 0;
+		for(int pivot: end_pivots) {
+			Pivot p;
+			p.value = pivot;
+			p.count = merged_exons[i].end_pivots_count[ind];
+			p.distance = ((merged_exons[i].minLocation + pivot) - merged_exons[i].stop)+1;
+
+			if(ref_data[merged_exons[i].minLocation + pivot + 1] == 'G' && ref_data[merged_exons[i].minLocation + pivot + 2] == 'T') {
+				p.type = -1;
+			} else if (ref_data[merged_exons[i].minLocation + pivot + 1] == 'C' && ref_data[merged_exons[i].minLocation + pivot + 2] == 'T') {
+				p.type = 1;
+			} else {
+				p.type = 0;
+			}
+			end_pivotes_structs.push_back(p);
+
+			ind += 1;
+		}
+
+		ind = 0;
+		for(int pivot: start_pivots) {
+			Pivot p;
+			p.value = pivot;
+			p.count = merged_exons[i+1].start_pivots_count[ind];
+			p.distance = (merged_exons[i+1].minLocation + pivot) - merged_exons[i+1].start;
+
+			if(ref_data[merged_exons[i+1].minLocation + pivot - 2] == 'A' && ref_data[merged_exons[i+1].minLocation + pivot - 1] == 'G') {
+				p.type = -1;
+			} else if (ref_data[merged_exons[i+1].minLocation + pivot - 2] == 'A' && ref_data[merged_exons[i+1].minLocation + pivot - 1] == 'C') {
+				p.type = 1;
+			} else {
+				p.type = 0;
+			}
+			start_pivotes_structs.push_back(p);
+
+			ind += 1;
+		}
+
+		Pivot chosen_start_p;
+		Pivot chosen_end_p;
+
+		bool is_chosen = false;
+
+		int current_diff = 0;
+		for(Pivot p: start_pivotes_structs) {
+			for(Pivot p2: end_pivotes_structs) {
+				if(p.type == p2.type && p.type != 0) {
+					if (std::abs(p.distance) < 20 && std::abs(p2.distance) < 20) {
+						if((p.count + p2.count) > current_diff) {
+							current_diff = p.count + p2.count;
+
+							is_chosen = true;
+							chosen_start_p = p;
+							chosen_end_p = p2;
+						}
+					}
+				}
+			}
+		}
+
+		current_diff = 0;
+
+		if(!is_chosen) {
+			for(Pivot p: start_pivotes_structs) {
+				for(Pivot p2: end_pivotes_structs) {
+					if (std::abs(p.distance) < 20 && std::abs(p2.distance) < 20) {
+						if((p.count + p2.count) > current_diff) {
+							current_diff = p.count + p2.count;
+
+							is_chosen = true;
+							chosen_start_p = p;
+							chosen_end_p = p2;
+						}
+					}
+				}
+			}
+		}
+
+		if(is_chosen) {
+			if(std::abs(chosen_end_p.distance) <= 25 && std::abs(chosen_start_p.distance) <= 25) {
+				merged_exons[i].rightOffset = chosen_end_p.distance;
+				merged_exons[i+1].leftOffset = -chosen_start_p.distance;
+			}
+		}
+	}
+
+	return merged_exons;
+}
+
 void FindEquivavlencyClasses(std::vector<std::vector<int> >* classes, std::vector<std::vector<int>> *equivalency_matrix, std::vector<int>* visited_nodes, int k, int n) {
 	for(int i = k+1; i < n; i++) {
 		if((*equivalency_matrix)[k][i] == 1) {
@@ -742,25 +871,15 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 		current_realignment_cluster.clear();
 	}
 
-//	for (int var = 0; var < realignment_clusters.size(); ++var) {
-//	  std::vector<RealignmentStructure *> current_realignment_cluster = realignment_clusters[var];
-//
-//	  std::ofstream myfile;
-//	  myfile.open ("clusters "+ std::to_string(var) +".txt");
-//
-//	  for (int i = 0; i < current_realignment_cluster.size(); ++i) {
-//		RealignmentStructure* realignment_structure = current_realignment_cluster[i];
-//		const SingleSequence *read = realignment_structure->sequence;
-//
-//		myfile << read->get_header() << std::endl;
-//	  }
-//
-//	  myfile.close();
-//	}
+	 std::cout << "Number of alignment clusters to process: " << realignment_clusters.size() << std::endl;
 
 	#pragma omp parallel for num_threads(num_threads) firstprivate(evalue_params) shared(parameters, sam_lines) schedule(dynamic, 1)
 	for (int var = 0; var < realignment_clusters.size(); ++var) {
 	  std::vector<RealignmentStructure *> current_realignment_cluster = realignment_clusters[var];
+
+	  std::cout << "Postprocessing alingments cluster number " << var << " / " << realignment_clusters.size() << std::endl;
+
+//	  std::vector<RealignmentStructure *> current_realignment_cluster2 = realignment_clusters[1];
 
 	  uint32_t thread_id = omp_get_thread_num();
 
@@ -949,13 +1068,11 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	  }
 
 	  std::vector<std::vector<ExonInfo>> clusters_of_exons;
-
 	  for(std::vector<ExonInfo> &cluster_of_exons: clusters_of_exons_mid) {
 
-		  if(cluster_of_exons.size() > 4000) {
-			  continue;
-		  }
-
+//		  if(cluster_of_exons.size() > 4000) {
+//			  continue;
+//		  }
 		  std::vector<std::vector<int>> equivalency_matrix;
 
 		  for(int64_t i = 0; i < cluster_of_exons.size(); i++) {
@@ -1008,7 +1125,7 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	  }
 
 	  for(std::vector<ExonInfo> &exon_cluster: clusters_of_exons) {
-	    	 if (exon_cluster.size() / (double) number_of_reads_processed > 0.1) {
+	    	 if (exon_cluster.size() / (double) number_of_reads_processed > 0.00001) {
 	    		 std::vector<std::string> sequences;
 	    		 std::sort(std::begin(exon_cluster), std::end(exon_cluster), [](ExonInfo a, ExonInfo b) { return a.reference.size() > b.reference.size(); });
 
@@ -1042,146 +1159,27 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 			 std::vector<int> start_pivots;
 			 std::vector<int> end_pivots;
 
+			 std::vector<int> start_pivots_count;
+			 std::vector<int> end_pivots_count;
+
 	    	 	 for (int location = 0; location < coverageSize; ++location) {
-	    	 		 if((coverageArrayStart[location] / (double) max_coverage) > 0.2) {
+	    	 		 if((coverageArrayStart[location] / (double) max_coverage) > 0.08) {
 	    	 			 start_pivots.push_back(location);
+	    	 			 start_pivots_count.push_back(coverageArrayStart[location]);
 	    	 		 }
-	    	 		 if((coverageArrayEnd[location] / (double) max_coverage) > 0.2) {
+	    	 		 if((coverageArrayEnd[location] / (double) max_coverage) > 0.08) {
     	 				 end_pivots.push_back(location);
+    	 				 end_pivots_count.push_back(coverageArrayEnd[location]);
 	    	 		 }
 	    	 	 }
 
-	    	 	 std::vector<std::vector<int>> set_of_start_pivots;
-	    	 	 std::vector<int> curent_start_pivots;
-
-	    	 	 if(start_pivots.size() > 0) {
-	    	 		int previous_pivot = start_pivots[0];
-
-		    	 	 curent_start_pivots.push_back(previous_pivot);
-
-		    	 	 for(int i = 1; i < start_pivots.size(); i++) {
-		    	 		 int pivot = start_pivots[i];
-
-		    	 		 if(pivot - previous_pivot < 6) {
-		    	 			 curent_start_pivots.push_back(pivot);
-		    	 			 previous_pivot = pivot;
-		    	 		 } else {
-		    	 			 set_of_start_pivots.push_back(curent_start_pivots);
-		    	 			 curent_start_pivots.clear();
-		    	 			 previous_pivot = pivot;
-		    	 			curent_start_pivots.push_back(pivot);
-		    	 		 }
-		    	 	 }
-
-		    	 	 set_of_start_pivots.push_back(curent_start_pivots);
-
-		    	 	 start_pivots.clear();
-
-		    	 	 for(std::vector<int> pivots_array: set_of_start_pivots) {
-		    	 		 int max_pivot = pivots_array[0];
-		    	 		 int max_value = coverageArrayStart[max_pivot];
-
-		    	 		 for(int i = 1; i < pivots_array.size(); i++) {
-		    	 			 int curr_pivot = pivots_array[i];
-		    	 			 int max_value_curr = coverageArrayStart[curr_pivot];
-		    	 			 if(max_value_curr > max_value) {
-		    	 				 max_pivot = curr_pivot;
-		    	 				 max_value = max_value_curr;
-		    	 			 }
-		    	 		 }
-
-		    	 		 start_pivots.push_back(max_pivot);
-		    	 	 }
-	    	 	 }
-
-	    	 	 std::vector<std::vector<int>> set_of_end_pivots;
-	    	 	 std::vector<int> curent_end_pivots;
-
-	    	 	 if(end_pivots.size() > 0) {
-	    	 		 int previous_pivot = end_pivots[0];
-
-	 	    	 	curent_end_pivots.push_back(previous_pivot);
-
-	 	    	 	 for(int i = 1; i < end_pivots.size(); i++) {
-	 	    	 		 int pivot = end_pivots[i];
-
-	 	    	 		 if(pivot - previous_pivot < 6) {
-	 	    	 			curent_end_pivots.push_back(pivot);
-	 	    	 			previous_pivot = pivot;
-	 	    	 		 } else {
-	 	    	 			set_of_end_pivots.push_back(curent_end_pivots);
-	 	    	 			curent_end_pivots.clear();
-	 	    	 			previous_pivot = pivot;
-	 	    	 			curent_end_pivots.push_back(pivot);
-	 	    	 		 }
-	 	    	 	 }
-
-	 	    	 	set_of_end_pivots.push_back(curent_end_pivots);
-
-	 			 end_pivots.clear();
-
-	 			 for(std::vector<int> pivots_array: set_of_end_pivots) {
-	 				 int max_pivot = pivots_array[0];
-	 				 int max_value = coverageArrayEnd[max_pivot];
-
-	 				 for(int i = 1; i < pivots_array.size(); i++) {
-	 					 int curr_pivot = pivots_array[i];
-	 					 int max_value_curr = coverageArrayEnd[curr_pivot];
-	 					 if(max_value_curr > max_value) {
-	 						 max_pivot = curr_pivot;
-	 						 max_value = max_value_curr;
-	 					 }
-	 				 }
-
-	 				 end_pivots.push_back(max_pivot);
-	 			 }
-	    	 	 }
-
-		    	 for(ExonInfo &einfo: exon_cluster) {
-			    	 int startOffset = 0;
-			    	 int endOffset = 0;
-
-			    	 int distance_start = max_coverage + 1;
-
-			    	 for(int pivot: start_pivots) {
-			    		 int64_t current_location = einfo.start - minLocation;
-			    		 int64_t new_distance = abs(pivot - current_location);
-			    		 if(new_distance < distance_start) {
-			    			 distance_start = new_distance;
-			    			 startOffset = pivot;
-			    		 }
-			    	 }
-
-			    	 int distance_end = max_coverage + 1;
-
-			    	 for(int pivot: end_pivots) {
-			    		 int64_t current_location = (einfo.stop-minLocation)-1;
-			    		 int64_t new_distance = abs(pivot - current_location);
-			    		 if(new_distance < distance_end) {
-			    			 distance_end = new_distance;
-			    			 endOffset = (coverageSize-1) - pivot;
-			    		 }
-			    	 }
-
-			    	 if(!einfo.isStartExon) {
-			    		 einfo.leftOffset = (einfo.start - minLocation) - startOffset;
-			    	 } else {
-			    		 einfo.leftOffset = 0;
-			    	 }
-			    	 if(!einfo.isEndExon) {
-			    		 einfo.rightOffset = (maxLocation - einfo.stop) - endOffset;
-			    	 } else {
-			    		 einfo.rightOffset = 0;
-			    	 }
-
-			    	 if(std::abs(einfo.leftOffset) > 25) {
-			    		 einfo.leftOffset = 0;
-			    	 }
-
-			    	 if(std::abs(einfo.rightOffset) > 25) {
-			    		 einfo.rightOffset = 0;
-			    	 }
-		    	 }
+			 for(ExonInfo &einfo: exon_cluster) {
+				 einfo.minLocation = minLocation;
+				 einfo.start_pivots = start_pivots;
+				 einfo.end_pivots = end_pivots;
+				 einfo.start_pivots_count = start_pivots_count;
+				 einfo.end_pivots_count = end_pivots_count;
+			 }
 	    	 } else {
 			 for(ExonInfo &einfo: exon_cluster) {
 				if(einfo.stop - einfo.start < 15) {
@@ -1194,6 +1192,7 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	  std::map<std::string, std::vector<ExonInfo>> map_of_exons;
 
 	  for(std::vector<ExonInfo> &exon_cluster: clusters_of_exons) {
+
 		for(ExonInfo &einfo: exon_cluster) {
 			  if (map_of_exons.find(einfo.read_id) != map_of_exons.end()) {
 				  std::map<std::string, std::vector<ExonInfo>>::iterator i = map_of_exons.find(einfo.read_id);
@@ -1207,8 +1206,8 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	  }
 
 	  for (auto x : map_of_exons) {
-		 std::vector<is::CigarOp> rez = ProcessReadExons(x.second, ref_data);
-
+		 std::vector<ExonInfo> modified_exons = set_exon_offsets(x.second, ref_data);
+		 std::vector<is::CigarOp> rez = ProcessReadExons(modified_exons, ref_data);
 		 if (rez.size() > 0 && x.second.size() > 0) {
 
 			  for (int i = 0; i < current_realignment_cluster.size(); ++i) {
@@ -1245,6 +1244,8 @@ void GraphMap::PostprocessRNAData(std::vector<RealignmentStructure *> realignmen
 	for (int var = 0; var < number_of_refs; ++var) {
 	  delete [] coverages_array[var];
 	}
+
+	std::cout << "End." << std::endl;
 }
 
 int GraphMap::ProcessSequenceFileInParallel(ProgramParameters *parameters, const SequenceFile *reads, clock_t *last_time, FILE *fp_out, int64_t *ret_num_mapped, int64_t *ret_num_unmapped) {
@@ -1260,8 +1261,8 @@ int GraphMap::ProcessSequenceFileInParallel(ProgramParameters *parameters, const
 //
 //  if (parameters->num_threads > 0)
 //    int64_t num_threads = 1;
-
   int64_t num_threads = (int64_t) parameters->num_threads;
+
   LogSystem::GetInstance().Log(VERBOSE_LEVEL_HIGH | VERBOSE_LEVEL_MED, true, FormatString("Using %ld threads.", num_threads), "ProcessReads");
 
   // Set up the starting and ending read index.

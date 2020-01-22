@@ -40,6 +40,7 @@ class AnchorAligner {
 
   std::shared_ptr<AlignmentResult> CreateAlignmentResult(int64_t qstart, int64_t qend, int64_t rstart, int64_t rend, std::vector<is::CigarOp> rez);
 
+  double AlignEdges(const char *query, const char *ref, int leftRef, int rightRef, int64_t start_position_read, int64_t start_position_ref, int number_of_bases,  std::stack<is::CigarOp> cigar_stack, std::deque<is::CigarOp> cigar_queue);
   void AdjustEnds(int left_offset_ref, int right_offset_ref, const char *query, const char *ref, int64_t *start_position_ref, int64_t *start_position_read, int number_of_bases, std::stack<is::CigarOp> *cigar_stack, std::deque<is::CigarOp> *cigar_queue, bool type);
 
   /* Sorts anchors and then performs global alignment between the minimum and maximum anchor coordinates.

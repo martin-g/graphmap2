@@ -37,6 +37,13 @@ struct ExonMatch {
 	int coverage;
 };
 
+struct Pivot {
+	int distance;
+	int value;
+	int type;
+	int count;
+};
+
 class ExonsCluster {
 public:
 	int cuttedRefStart;
@@ -158,6 +165,8 @@ public:
 		reference = "";
 		isStartExon = false;
 		isEndExon = false;
+		minLocation = 0;
+		coverageSize = 0;
 	}
 
 	ExonInfo(ExonInfo ei1, ExonInfo ei2) {
@@ -180,6 +189,9 @@ public:
 		reference = "";
 		isStartExon = false;
 		isEndExon = false;
+
+		minLocation = 0;
+		coverageSize = 0;
 	}
 
 	int64_t start;
@@ -199,6 +211,13 @@ public:
 
 	int leftOffset;
 	int rightOffset;
+
+	std::vector<int> start_pivots;
+	std::vector<int> end_pivots;
+	std::vector<int> start_pivots_count;
+	std::vector<int> end_pivots_count;
+	int64_t minLocation;
+	int64_t coverageSize;
 };
 
 class GraphMap {

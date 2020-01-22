@@ -799,6 +799,7 @@ bool HackIntermediateMapping(MappingData *mapping_data, std::shared_ptr<is::Mini
     curr_aln->cigar = AlignmentToCigar((unsigned char *) &(curr_aln->alignment[0]), curr_aln->alignment.size(), parameters->use_extended_cigar);
 
     LOG_DEBUG_SPEC("Converting alignment to MD string.\n");
+
     curr_aln->md = AlignmentToMD((std::vector<unsigned char> &) curr_aln->alignment, &index->get_data()[0], final_aln_pos_start);
 
     LOG_DEBUG_SPEC("Counting alignment operations.\n");
@@ -884,7 +885,7 @@ bool GraphMap::GetMappingData(RealignmentStructure* rs, std::shared_ptr<is::Mini
 		int64_t new_start = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_stop - halvening) - buffer_offset));
 		int64_t new_stop = buffer_offset + (index->get_reference_lengths()[desired_index] - ((rs->raw_start - halvening) - buffer_offset));
 
-		result = anchor_aligner->CreateAlignmentResult(new_start, new_stop, rs->query_start, rs->query_end, rez);
+		result = anchor_aligner->CreateAlignmentResult(std::max((int64_t) 0 ,new_start), new_stop, rs->query_start, rs->query_end, rez);
 	}
 
 	double score = 0;
