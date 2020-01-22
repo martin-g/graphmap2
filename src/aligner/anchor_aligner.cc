@@ -34,112 +34,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalEndToEnd(int64_t abs_ref_i
   return GlobalAnchored(abs_ref_id, index, query, qlen, ref, rlen, final_anchors, true);
 }
 
-bool FindRefOffsets(const char *ref, char first_base, char second_base, char third_base, char fourth_base, int64_t *left_offset, int64_t *right_offset, int64_t start_position, int number_of_bases) {
-	bool found_left_offset = false;
-	if(std::toupper(ref[start_position]) == first_base && std::toupper(ref[start_position+1]) == second_base) {
-		*left_offset = 0;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position-1]) == first_base && std::toupper(ref[start_position]) == second_base) {
-		*left_offset = -1;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position+1]) == first_base && std::toupper(ref[start_position+2]) == second_base) {
-		*left_offset = 1;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position+2]) == first_base && std::toupper(ref[start_position+3]) == second_base) {
-		*left_offset = 2;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position-2]) == first_base && std::toupper(ref[start_position-1]) == second_base) {
-		*left_offset = -2;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position-3]) == first_base && std::toupper(ref[start_position-2]) == second_base) {
-		*left_offset = -3;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position+3]) == first_base && std::toupper(ref[start_position+4]) == second_base) {
-		*left_offset = 3;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position+4]) == first_base && std::toupper(ref[start_position+5]) == second_base) {
-		*left_offset = 4;
-		found_left_offset = true;
-	} else if(std::toupper(ref[start_position-4]) == first_base && std::toupper(ref[start_position-3]) == second_base) {
-		*left_offset = -4;
-		found_left_offset = true;
-	}
-//	else if(std::toupper(ref[start_position+5]) == first_base && std::toupper(ref[start_position+6]) == second_base) {
-//		*left_offset = 5;
-//		found_left_offset = true;
-//	} else if(std::toupper(ref[start_position-5]) == first_base && std::toupper(ref[start_position-4]) == second_base) {
-//		*left_offset = -5;
-//		found_left_offset = true;
-//	}
-//	else if(std::toupper(ref[start_position+6]) == first_base && std::toupper(ref[start_position+7]) == second_base) {
-//		*left_offset = 6;
-//		found_left_offset = true;
-//	} else if(std::toupper(ref[start_position-6]) == first_base && std::toupper(ref[start_position-5]) == second_base) {
-//		*left_offset = -6;
-//		found_left_offset = true;
-//	}
-//	else if(std::toupper(ref[start_position+7]) == first_base && std::toupper(ref[start_position+8]) == second_base) {
-//		*left_offset = 7;
-//		found_left_offset = true;
-//	} else if(std::toupper(ref[start_position-7]) == first_base && std::toupper(ref[start_position-6]) == second_base) {
-//		*left_offset = -7;
-//		found_left_offset = true;
-//	}
-
-	bool found_right_offset = false;
-	if(std::toupper(ref[start_position + number_of_bases - 2]) == third_base && std::toupper(ref[start_position + number_of_bases - 1]) == fourth_base) {
-		*right_offset = 0;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases - 3]) == third_base && std::toupper(ref[start_position + number_of_bases - 2]) == fourth_base) {
-		*right_offset = -1;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases - 1]) == third_base && std::toupper(ref[start_position + number_of_bases]) == fourth_base) {
-		*right_offset = 1;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases - 4]) == third_base && std::toupper(ref[start_position + number_of_bases - 3]) == fourth_base) {
-		*right_offset = -2;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases]) == third_base && std::toupper(ref[start_position + number_of_bases + 1]) == fourth_base) {
-		*right_offset = 2;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases - 5]) == third_base && std::toupper(ref[start_position + number_of_bases - 4]) == fourth_base) {
-		*right_offset = -3;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases + 1]) == third_base && std::toupper(ref[start_position + number_of_bases + 2]) == fourth_base) {
-		*right_offset = 3;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases - 6]) == third_base && std::toupper(ref[start_position + number_of_bases - 5]) == fourth_base) {
-		*right_offset = -4;
-		found_right_offset = true;
-	} else if (std::toupper(ref[start_position + number_of_bases + 2]) == third_base && std::toupper(ref[start_position + number_of_bases + 3]) == fourth_base) {
-		*right_offset = 4;
-		found_right_offset = true;
-	}
-//	else if (std::toupper(ref[start_position + number_of_bases - 7]) == third_base && std::toupper(ref[start_position + number_of_bases - 6]) == fourth_base) {
-//		*right_offset = -5;
-//		found_right_offset = true;
-//	} else if (std::toupper(ref[start_position + number_of_bases + 3]) == third_base && std::toupper(ref[start_position + number_of_bases + 4]) == fourth_base) {
-//		*right_offset = 5;
-//		found_right_offset = true;
-//	}
-//	else if (std::toupper(ref[start_position + number_of_bases - 8]) == third_base && std::toupper(ref[start_position + number_of_bases - 7]) == fourth_base) {
-//		*right_offset = -6;
-//		found_right_offset = true;
-//	} else if (std::toupper(ref[start_position + number_of_bases + 4]) == third_base && std::toupper(ref[start_position + number_of_bases + 5]) == fourth_base) {
-//		*right_offset = 6;
-//		found_right_offset = true;
-//	}
-//	else if (std::toupper(ref[start_position + number_of_bases - 9]) == third_base && std::toupper(ref[start_position + number_of_bases - 8]) == fourth_base) {
-//		*right_offset = -7;
-//		found_right_offset = true;
-//	} else if (std::toupper(ref[start_position + number_of_bases + 5]) == third_base && std::toupper(ref[start_position + number_of_bases + 6]) == fourth_base) {
-//		*right_offset = 7;
-//		found_right_offset = true;
-//	}
-
-	return found_left_offset && found_right_offset;
-}
-
 int FindReadLeftOffset(const char *query, int left_offset_ref, int64_t start_position_read, std::stack<is::CigarOp> *cigar_stack) {
 	int counter = -left_offset_ref;
 	int read_offset = 0;
@@ -238,15 +132,204 @@ int FindReadRightOffset(const char *query, int right_offset_ref, int64_t start_p
 	return read_offset;
 }
 
+bool FindRefOffsets2(const char *ref, char first_base, char second_base, char third_base, char fourth_base, std::vector<int> *left_offset, std::vector<int> *right_offset, int64_t start_position, int number_of_bases) {
+
+	int limit = 10;
+	for(int i = -limit; i < limit; i++) {
+		if(std::toupper(ref[start_position+i]) == first_base && std::toupper(ref[start_position+i+1]) == second_base) {
+			left_offset->push_back(i);
+		}
+	}
+
+	for(int i = -limit; i < limit; i++) {
+		if(std::toupper(ref[start_position+number_of_bases+i-2]) == third_base && std::toupper(ref[start_position+number_of_bases+i-1]) == fourth_base) {
+			right_offset->push_back(i);
+		}
+	}
+	return false;
+}
+
+double AnchorAligner::AlignEdges(const char *query, const char *ref, int leftRef, int rightRef, int64_t start_position_read, int64_t start_position_ref, int number_of_bases,  std::stack<is::CigarOp> cigar_stack, std::deque<is::CigarOp> cigar_queue) {
+
+	std::string read_container;
+	std::string ref_container;
+
+	int counter = leftRef;
+
+	while(counter > 0) {
+		ref_container.insert(0, 1, ref[start_position_ref+counter-1]);
+		counter -= 1;
+	}
+
+	int offset = std::min(0, leftRef);
+
+	counter = offset;
+
+	int window = 10;
+
+	while(counter > offset - window) {
+		ref_container.insert(0, 1, ref[start_position_ref+counter-1]);
+		counter -= 1;
+	}
+
+	counter = -offset + window;
+	int read_offset = 0;
+
+	while (!cigar_stack.empty()) {
+
+		is::CigarOp c = cigar_stack.top();
+		cigar_stack.pop();
+		int count = c.count;
+
+		if(c.op == 'N' || c.op == 'S') {
+			break;
+		}
+
+		if(c.op == '=' || c.op == 'X') {
+			if(count > counter) {
+				read_offset += counter;
+				is:CigarOp new_c = is::CigarOp(c.op, count - counter);
+				break;
+			} else if(count == counter) {
+				read_offset += counter;
+				break;
+			} else {
+				read_offset += count;
+				counter -= count;
+			}
+		}
+
+		if(c.op == 'D') {
+			if(count > counter) {
+				is::CigarOp new_c = is::CigarOp(c.op, count - counter);
+				break;
+			} else if(count == counter) {
+				break;
+			} else {
+				counter -= count;
+			}
+		}
+
+		if(c.op == 'I') {
+			read_offset += count;
+		}
+	}
+
+	counter = read_offset;
+
+	while(counter > 0) {
+		read_container.push_back(query[start_position_read-counter]);
+		counter -= 1;
+	}
+
+	std::string read_container_right;
+	std::string ref_container_right;
+
+	counter = rightRef;
+
+	while(counter < 0) {
+		ref_container_right.push_back(ref[start_position_ref+number_of_bases+counter]);
+		counter += 1;
+	}
+
+	int offset_right = std::max(0, rightRef);
+
+	counter = offset_right;
+
+	while(counter < offset_right + window) {
+		ref_container_right.push_back(ref[start_position_ref+number_of_bases+counter]);
+		counter += 1;
+	}
+
+	counter = offset_right + window;
+	int read_offset_right = 0;
+
+	while (!cigar_queue.empty()) {
+		is::CigarOp c = cigar_queue.front();
+		cigar_queue.pop_front();
+		int count = c.count;
+
+		if(c.op == 'N' || c.op == 'S') {
+			cigar_queue.push_front(c);
+			break;
+		}
+
+		if(c.op == '=' || c.op == 'X') {
+			if(count > counter) {
+				read_offset_right += counter;
+				break;
+			} else if(count == counter) {
+				read_offset_right += counter;
+				break;
+			} else {
+				read_offset_right += count;
+				counter -= count;
+			}
+		}
+
+		if(c.op == 'D') {
+			if(count > counter) {
+				is::CigarOp new_c = is::CigarOp(c.op, count - counter);
+				cigar_queue.push_front(new_c);
+				break;
+			} else if(count == counter) {
+				break;
+			} else {
+				counter -= count;
+			}
+		}
+
+		if(c.op == 'I') {
+			read_offset_right += count;
+		}
+	}
+
+	counter = 0;
+
+	while(counter < read_offset_right) {
+		read_container_right.push_back(query[start_position_read+counter]);
+		counter += 1;
+	}
+
+	std::string ref_cut = ref_container + ref_container_right;
+	std::string read_cut = read_container + read_container_right;
+
+	if(std::abs((long int)(read_cut.size() - ref_cut.size())) > (long int) 60) {
+		return -1;
+	}
+
+	const char* ref_sub = ref_cut.c_str();
+	const char* read_sub = read_cut.c_str();
+
+//		std::cout << "ref: " << ref_sub << std::endl;
+//		std::cout << "read: " << read_sub << std::endl;
+//
+//		std::cout << "start_position_ref " << start_position_ref << std::endl;
+//		std::cout << "number_of_bases " << start_position_ref+number_of_bases << std::endl;
+
+	aligner_->Global(read_sub, read_cut.size(), ref_sub, ref_cut.size(), 1);
+	auto aln_result_sub = aligner_->getResults();
+
+	int matches = 0;
+	int length = 0;
+
+	for (auto& c: aln_result_sub->cigar) {
+		if(c.op == '=') {
+			matches += c.count;
+		}
+		length += c.count;
+	}
+
+	return (double) matches / (double) length;
+}
+
+
 void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const char *query, const char *ref, int64_t *start_position_ref, int64_t *start_position_read, int number_of_bases, std::stack<is::CigarOp> *cigar_stack, std::deque<is::CigarOp> *cigar_queue, bool type) {
 	int left_offset_read = left_offset_ref > 0 ? 0 : FindReadLeftOffset(query, left_offset_ref, *start_position_read, cigar_stack);
 	int right_offset_read = right_offset_ref < 0 ? 0 : FindReadRightOffset(query, right_offset_ref, *start_position_read + number_of_bases, cigar_queue);
 
-//	std::cout << "lr " << left_offset_read << " " << left_offset_ref << std::endl;
-//	std::cout << "rr " << right_offset_read << " " << right_offset_ref << std::endl;
 
 	if (left_offset_ref >= 0 && right_offset_ref <= 0) {
-//		std::cout << "1" << std::endl;
 		if(left_offset_ref > 0) {
 			is::CigarOp c_left = is::CigarOp('D', left_offset_ref);
 			cigar_stack->push(c_left);
@@ -261,7 +344,6 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 		*start_position_ref += number_of_bases;
 
 	} else if (left_offset_ref <= 0 && right_offset_ref >= 0) {
-//		std::cout << "2" << std::endl;
 		if(left_offset_read > 0) {
 			is::CigarOp c_left = is::CigarOp('I', left_offset_read);
 			cigar_stack->push(c_left);
@@ -277,7 +359,6 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 		*start_position_read += (right_offset_read);
 
 	} else if (left_offset_ref >= 0 && right_offset_ref >= 0) {
-//		std::cout << "3" << std::endl;
 		std::string ref_string;
 		for(int64_t i = 0; i < left_offset_ref; i++) {
 			ref_string.push_back(ref[*start_position_ref + i]);
@@ -303,7 +384,6 @@ void AnchorAligner::AdjustEnds(int left_offset_ref, int right_offset_ref, const 
 		*start_position_read += (right_offset_read);
 
 	} else if (left_offset_ref <= 0 && right_offset_ref <= 0) {
-//		std::cout << "4" << std::endl;
 		std::string ref_string;
 		for(int64_t i = right_offset_ref; i < 0; i++) {
 			ref_string.push_back(ref[*start_position_ref + number_of_bases - i]);
@@ -381,14 +461,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchoredWithClipping(const
   auto aln_result = aligner_->getResults();
 
   result->cigar.insert(result->cigar.end(), aln_result->cigar.begin(), aln_result->cigar.end());
-
-  // Add the soft clippings at front and back.
-//  if ( anchors.front().qstart > 0) {
-//    result->cigar.insert(result->cigar.begin(), is::CigarOp('S', anchors.front().qstart));
-//  }
-//  if ((qlen - anchors.back().qend) > 0) {
-//    result->cigar.insert(result->cigar.end(), is::CigarOp('S', (qlen - anchors.back().qend)));
-//  }
 
   for (auto& c: result->cigar) {
 	  if(c.op != 'N' && c.op != 'D') {
@@ -597,18 +669,46 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchoredWithClipping(const
 		}
 
 		if (cigar_op.op == 'N') {
-			int64_t left_offset_ref = 0;
-			int64_t right_offset_ref = 0;
-			bool found_base_pairs = FindRefOffsets(ref, 'G', 'T', 'A', 'G', &left_offset_ref, &right_offset_ref, start_position_ref, number_of_bases);
-			if(found_base_pairs && (left_offset_ref != 0 || right_offset_ref != 0)) {
-				AdjustEnds(left_offset_ref, right_offset_ref, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
+			std::vector<int> leftRef;
+			std::vector<int> rightRef;
+
+			bool test = FindRefOffsets2(ref, 'G', 'T', 'A', 'G', &leftRef, &rightRef, start_position_ref, number_of_bases);
+
+			double rezult = -1;
+
+			int rezL = 0;
+			int rezR = 0;
+
+			for(int left: leftRef) {
+				for(int right: rightRef) {
+					double rez = AlignEdges(query, ref, left, right, start_position_read, start_position_ref, number_of_bases, cigar_stack, cigar_queue);
+					if(rez > 0 && rez > rezult) {
+						rezult = rez;
+						rezL = left;
+						rezR = right;
+					}
+				}
+			}
+
+			std::vector<int> leftRef2;
+			std::vector<int> rightRef2;
+
+			test = FindRefOffsets2(ref, 'C', 'T', 'A', 'C', &leftRef2, &rightRef2, start_position_ref, number_of_bases);
+
+			for(int left: leftRef2) {
+				for(int right: rightRef2) {
+					double rez = AlignEdges(query, ref, left, right, start_position_read, start_position_ref, number_of_bases, cigar_stack, cigar_queue);
+					if(rez > rezult) {
+						rezult = rez;
+						rezL = left;
+						rezR = right;
+					}
+				}
+			}
+
+			if(rezL != 0 || rezR != 0) {
+				AdjustEnds(rezL, rezR, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
 			} else {
-				int64_t left_offset_ref = 0;
-				int64_t right_offset_ref = 0;
-				bool found_base_pairs = FindRefOffsets(ref, 'C', 'T', 'A', 'C', &left_offset_ref, &right_offset_ref, start_position_ref, number_of_bases);
-				if(found_base_pairs && (left_offset_ref != 0 || right_offset_ref != 0)) {
-					AdjustEnds(left_offset_ref, right_offset_ref, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
-				} else {
 					cigar_stack.push(cigar_op);
 
 					if(cigar_op.op != 'I') {
@@ -617,7 +717,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchoredWithClipping(const
 					if(cigar_op.op != 'D' && cigar_op.op != 'N') {
 						start_position_read += cigar_op.count;
 					}
-				}
 			}
 		} else {
 			cigar_stack.push(cigar_op);
@@ -656,7 +755,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchoredWithClipping(const
   	  result_After->cigar.push_back(c);
     }
 
-  return result_After;
+    return result_After;
 }
 
 std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_id, std::shared_ptr<is::MinimizerIndex> index, const char *query, int64_t qlen, const char *ref, int64_t rlen, const std::vector<AlignmentAnchor>& anchors, bool type) {
@@ -682,7 +781,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 	  int64_t start_ref = anchors[i].rstart + offset;
 	  int64_t start_ref_q = anchors[i].qstart + offset_q;
 
-	  if(((anchors[i+1].qend - start_ref_q) > 25000 || (anchors[i+1].rend - start_ref) > 85000) || ((anchors[i+1].rend - start_ref) + (anchors[i+1].qend - start_ref_q) > 88000)) {
+	  if(((anchors[i+1].qend - start_ref_q) > 25000 || (anchors[i+1].rend - start_ref) > 85000) || ((anchors[i+1].rend - start_ref) + (anchors[i+1].qend - start_ref_q) > 88000) || (anchors[i+1].qend - start_ref_q) <= 0 || (anchors[i+1].rend - start_ref) <= 0) {
 		  return result;
 	  }
 
@@ -695,7 +794,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 
 	  auto left_part = ExtractCigarBetweenQueryCoords(aln_result->cigar,
 		                                                    0,
-		                                                    anchors[i+1].qstart - anchors[i].qstart, &cigar_length, &cigar_length_q); // Leave next anchor for the next alignment.
+		                                                    anchors[i+1].qstart - start_ref_q, &cigar_length, &cigar_length_q); // Leave next anchor for the next alignment.
 
 	  refLen += cigar_length;
 	  refLen_q += cigar_length_q;
@@ -704,6 +803,7 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 	  offset_q = refLen_q - (anchors[i+1].qstart - firstQuery_q);
 
 	  result->cigar.insert(result->cigar.end(), left_part.begin(), left_part.end());
+
 	  result->score += aln_result->score;
   }
 
@@ -964,26 +1064,48 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 	}
 
 	if (cigar_op.op == 'N') {
-		int64_t left_offset_ref = 0;
-		int64_t right_offset_ref = 0;
-		bool found_base_pairs = FindRefOffsets(ref, 'G', 'T', 'A', 'G', &left_offset_ref, &right_offset_ref, start_position_ref, number_of_bases);
-		if(found_base_pairs && (left_offset_ref != 0 || right_offset_ref != 0)) {
-//			std::cout << "prvi" << std::endl;
-//			std::cout << ref[start_position_ref - 3] << ref[start_position_ref - 2] << ref[start_position_ref - 1] << ref[start_position_ref] << ref[start_position_ref + 1] << ref[start_position_ref + 2] << ref[start_position_ref + 3] << ref[start_position_ref + 4] << std::endl;
-//			std::cout << ref[start_position_ref + number_of_bases - 4] << ref[start_position_ref + number_of_bases - 3] << ref[start_position_ref + number_of_bases - 2] << ref[start_position_ref + number_of_bases - 1] << ref[start_position_ref + number_of_bases] << ref[start_position_ref + number_of_bases + 1] << ref[start_position_ref + number_of_bases + 2] << ref[start_position_ref + number_of_bases + 3] << ref[start_position_ref + number_of_bases + 4] << std::endl;
-//			std::cout << left_offset_ref << " " << right_offset_ref << std::endl;
-			AdjustEnds(left_offset_ref, right_offset_ref, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
+		std::vector<int> leftRef;
+		std::vector<int> rightRef;
+
+		bool test = FindRefOffsets2(ref, 'G', 'T', 'A', 'G', &leftRef, &rightRef, start_position_ref, number_of_bases);
+
+		double rezult = -1;
+
+		int rezL = 0;
+		int rezR = 0;
+
+		for(int left: leftRef) {
+			for(int right: rightRef) {
+				double rez = AlignEdges(query, ref, left, right, start_position_read, start_position_ref, number_of_bases, cigar_stack, cigar_queue);
+				if(rez > rezult) {
+					rezult = rez;
+					rezL = left;
+					rezR = right;
+				}
+			}
+		}
+
+		std::vector<int> leftRef2;
+		std::vector<int> rightRef2;
+
+		test = FindRefOffsets2(ref, 'C', 'T', 'A', 'C', &leftRef2, &rightRef2, start_position_ref, number_of_bases);
+
+		for(int left: leftRef2) {
+			for(int right: rightRef2) {
+				double rez = AlignEdges(query, ref, left, right, start_position_read, start_position_ref, number_of_bases, cigar_stack, cigar_queue);
+				if(rez > rezult) {
+					rezult = rez;
+					rezL = left;
+					rezR = right;
+				}
+			}
+		}
+
+		double rez = AlignEdges(query, ref, 0, 0, start_position_read, start_position_ref, number_of_bases, cigar_stack, cigar_queue);
+
+		if(rezL != 0 || rezR != 0) {
+			AdjustEnds(rezL, rezR, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
 		} else {
-			int64_t left_offset_ref = 0;
-			int64_t right_offset_ref = 0;
-			bool found_base_pairs = FindRefOffsets(ref, 'C', 'T', 'A', 'C', &left_offset_ref, &right_offset_ref, start_position_ref, number_of_bases);
-			if(found_base_pairs && (left_offset_ref != 0 || right_offset_ref != 0)) {
-//				std::cout << "drugi" << std::endl;
-//				std::cout << ref[start_position_ref - 3] << ref[start_position_ref - 2] << ref[start_position_ref - 1] << ref[start_position_ref] << ref[start_position_ref + 1] << ref[start_position_ref + 2] << ref[start_position_ref + 3] << ref[start_position_ref + 4] << std::endl;
-//				std::cout << ref[start_position_ref + number_of_bases - 4] << ref[start_position_ref + number_of_bases - 3] << ref[start_position_ref + number_of_bases - 2] << ref[start_position_ref + number_of_bases - 1] << ref[start_position_ref + number_of_bases] << ref[start_position_ref + number_of_bases + 1] << ref[start_position_ref + number_of_bases + 2] << ref[start_position_ref + number_of_bases + 3] << ref[start_position_ref + number_of_bases + 4] << std::endl;
-//				std::cout << left_offset_ref << " " << right_offset_ref << std::endl;
-				AdjustEnds(left_offset_ref, right_offset_ref, query, ref, &start_position_ref, &start_position_read, number_of_bases, &cigar_stack, &cigar_queue, 1);
-			} else {
 				cigar_stack.push(cigar_op);
 
 				if(cigar_op.op != 'I') {
@@ -992,7 +1114,6 @@ std::shared_ptr<AlignmentResult> AnchorAligner::GlobalAnchored(int64_t abs_ref_i
 				if(cigar_op.op != 'D' && cigar_op.op != 'N') {
 					start_position_read += cigar_op.count;
 				}
-			}
 		}
 	} else {
 		cigar_stack.push(cigar_op);
